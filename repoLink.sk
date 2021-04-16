@@ -35,7 +35,7 @@ options:
 	#
 
 	# The prefix option allows you to change the prefix of all messages.
-	prefix: &2Server &8»
+	prefix: &2Repository Link &8»
 
 	# Configure message colors.
 	color-1: &7
