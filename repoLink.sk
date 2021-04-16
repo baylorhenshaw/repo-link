@@ -148,7 +148,7 @@ function link_loadAndReplaceFiles():
 	loop {totalFiles::*}:
 		set {_now} to now
 		link_log("{@color-1}Reloading file {@color-2}'%loop-value%{@color-2}'{@color-1}.")
-		reload script "repo-link/%loop-value%.sk"
+		reload script "repo-link/%loop-value%"
 		link_log("{@color-1}Loaded file {@color-2}'%loop-value%{@color-2}'{@color-1}. &8({@color-1}%link_formatTimespan(difference between {_now} and now)%&8)")
 		wait 10 ticks
 	if {totalFiles::*} is not set:
