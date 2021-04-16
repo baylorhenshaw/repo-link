@@ -1,1 +1,201 @@
+#
+#	A script that links repositories to your Minecraft server.
+#
+#	repoLink.sk
+#	Version 1.0.0
+#
+# 	Written by Baezor.
+#
 
+#
+#	Option Configuration
+#
+
+# Options.
+options:
+	
+	#
+	#	Repository Link Options
+	#
+
+	# Reload all files when the server starts.
+	reload-on-start: true
+
+	# Wait. How long should the scirpt wait after it loads to refresh all of the scripts?
+	wait: 3 seconds
+
+	# Repositories
+	repos: "Baezor1/repo-link"
+
+	# Debug Mode
+	debug-mode: true
+
+	#
+	#	Colors and Messages
+	#
+
+	# The prefix option allows you to change the prefix of all messages.
+	prefix: &2Server &8»
+
+	# Configure message colors.
+	color-1: &7
+	color-2: &a
+	color-3: &2
+	error-color: &c
+
+	# The permission message is the message that shows when a player does not have
+	# permission for a command.
+	permission-message: &c&lError! &7You do not have permission to use this command!
+
+	#
+	#	Misc Options
+	#
+
+	# The version of repoLink.sk you have.
+	version: 1.0.0
+
+	# This is the storage prefix for the entire script. DO NOT ever change this unless
+	# the variables conflict with another script!
+	storage: repoLink
+
+#
+#	Repository Loading
+#
+
+# Server Start Event
+on skript load:
+	
+	# Check if this is enabled lol.
+	{@reload-on-start} is true
+	wait {@wait}
+	link_loadAndReplaceFiles()
+
+# Load and Replace Files
+function link_loadAndReplaceFiles():
+	
+	set {start} to now
+	set {repos::*} to {@repos}
+
+	link_log("&8-------------------------------------------------------------")
+	link_log("Starting to refresh all linked scripts.")
+	
+	wait 1 second
+	link_log("Starting to create file paths. &8({@color-1}1&8/{@color-1}3&8)")
+
+	# Delete Current Files
+	delete file path "downloads/repositories/"
+	link_log("{@color-1}Deleted file path {@color-2}'downloads/repositories/'{@color-1}.")
+	delete file path "plugins/Skript/scripts/repo-link/"
+	link_log("{@color-1}Deleted file path {@color-2}'plugins/Skript/scripts/repo-link/'{@color-1}.")
+	wait 10 ticks
+
+	# Create File Paths
+	create file path "downloads/repositories/"
+	link_log("{@color-1}Created file path {@color-2}'downloads/repositories/'{@color-1}.")
+	create file path "plugins/Skript/scripts/repo-link/"
+	link_log("{@color-1}Created file path {@color-2}'plugins/Skript/scripts/repo-link/'{@color-1}.")
+	wait 10 ticks
+
+	link_log("Starting to download all repositories. &8({@color-1}2&8/{@color-1}3&8)")
+
+	# Download Repositories
+	delete {totalFiles::*}
+	loop {repos::*}:
+		create file path "downloads/repositories/%loop-value%/"
+		link_log("{@color-1}Created file path {@color-2}'downloads/repositories/%loop-value%/'{@color-1}.")
+		wait 10 ticks
+		download from url "https://github.com/%loop-value%/archive/refs/heads/main.zip" to file path "downloads/repositories/%loop-value%/main.zip"
+		link_log("Downloaded files from repository {@color-2}'%loop-value%{@color-2}'{@color-1}.")
+		wait 10 ticks
+		if file path "downloads/repositories/%loop-value%/main.zip" is missing:
+			link_log("{@error-color}An error occured while trying to load the repository '%loop-value-1%{@error-color}'!")
+			link_log("{@error-color}Failed to download repository!")
+		else:
+			unzip all files in file path "downloads/repositories/%loop-value%/main.zip" to file path "downloads/repositories/%loop-value%"
+			link_log("Unzipped repository {@color-2}'%loop-value%{@color-2}'{@color-1}.")
+			wait 20 ticks
+			link_log("Searching for scripts in repository {@color-2}'%loop-value%{@color-2}'{@color-1}.")
+			set {_split::*} to loop-value split at "/"
+			if file path "downloads/repositories/%loop-value%/%{_split::2}%-main/" is not missing:
+				if file path "downloads/repositories/%loop-value%/%{_split::2}%-main/repo-link/" is not missing:
+					set {_files::*} to all files of dir path "downloads/repositories/%loop-value%/%{_split::2}%-main/repo-link/"
+					set {bool} to false
+					loop {_files::*}:
+						"%loop-value-2%" contains ".sk"
+						set {_splitFileName::*} to ("%loop-value-2%") split at "/"
+						loop {_splitFileName::*}:
+							loop-value-3 contains ".sk"
+							link_log("{@color-1}Found file {@color-2}'%loop-value-3%{@color-2}'{@color-1}.")
+							wait 3 ticks
+							move file path "%loop-value-2%" to file path "plugins/Skript/scripts/repo-link/%loop-value-3%"
+							link_log("{@color-1}Moved file {@color-2}'%loop-value-3%{@color-2}'{@color-1} to the linked scripts folder.")
+							add loop-value-3 to {totalFiles::*}
+						wait 3 ticks
+						set {bool} to true
+					{bool} is false
+					link_log("{@error-color}No files were found in the '%loop-value%{@error-color}' repository!")
+				else:
+					link_log("{@error-color}An error occured while trying to load the repository '%loop-value-1%{@error-color}'!")
+					link_log("{@error-color}No 'repo-link' folder found!")
+			else:
+				link_log("{@error-color}An error occured while trying to load the repository '%loop-value-1%{@error-color}'!")
+				link_log("{@error-color}Failed to download repository!")
+	wait 20 ticks
+
+	# Reload all the new files.
+	link_log("Starting to reload all updated files. &8({@color-1}3&8/{@color-1}3&8)")
+
+	loop {totalFiles::*}:
+		set {_now} to now
+		link_log("{@color-1}Reloading file {@color-2}'%loop-value%{@color-2}'{@color-1}.")
+		reload script "repo-link/%loop-value%.sk"
+		link_log("{@color-1}Loaded file {@color-2}'%loop-value%{@color-2}'{@color-1}. &8({@color-1}%link_formatTimespan(difference between {_now} and now)%&8)")
+		wait 10 ticks
+	if {totalFiles::*} is not set:
+		link_log("{@error-color}No files to reload!")
+
+	link_log("Finished!")
+
+	# Ending Everything lol
+	set {_time} to difference between {start} and now
+	set {_loaded} to amount of {totalFiles::*}
+	if {_loaded} is not set:
+		set {_loaded} to 0
+	set {_list::*} to {@repos}
+	loop {_list::*}:
+		add 1 to {_amount}
+	if {_amount} is not set:
+		set {_amount} to 0
+	if {_amount} is 1:
+		link_log("Loaded {@color-2}%{_loaded}%{@color-1} script(s) from {@color-2}%{_amount}%{@color-1} repository in {@color-2}%link_formatTimespan({_time})%{@color-1}.")
+	else:
+		link_log("Loaded {@color-2}%{_loaded}%{@color-1} script(s) from {@color-2}%{_amount}%{@color-1} repositories in {@color-2}%link_formatTimespan({_time})%{@color-1}.")
+
+	link_log("&8-------------------------------------------------------------")
+
+#
+#	Misc Functions
+#
+
+# Log Action
+function link_log(string: string):
+	if {@debug-mode} is true:
+		broadcast "&8[{@color-3}repo-link&8] {@color-1}%{_string}%"
+	else:
+		send "&8[{@color-3}repo-link&8] {@color-1}%{_string}%" to console
+
+# Format Time
+function link_formatTimespan(time: timespan) :: text:
+	set {_time} to "%{_time}%"
+	set {_l::*} to split {_time} at " "
+	loop {_l::*}:
+		delete {_i}
+		set {_i} to loop-value parsed as a number
+		{_i} is set
+		set {_i} to round({_i})
+		replace every "%loop-value%" in {_time} with "%{_i}%"
+	replace all " seconds" or " second" in {_time} with "s"
+	replace all " minutes" or " minute" in {_time} with "m"
+	replace all " hours" or " hour" in {_time} with "h"
+	replace all " days" or " day" in {_time} with "d"
+	return {_time}
