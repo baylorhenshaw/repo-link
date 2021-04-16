@@ -28,7 +28,7 @@ options:
 	repos: "Baezor1/repo-link"
 
 	# Debug Mode
-	debug-mode: true
+	debug-mode: false
 
 	#
 	#	Colors and Messages
