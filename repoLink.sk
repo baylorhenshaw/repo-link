@@ -62,6 +62,18 @@ options:
 #	Repository Loading
 #
 
+# Command to Reload Stuff
+command /reporeload:
+	permission: *
+	permission message: {@permission-message}
+	trigger:
+		send "&6Warning! Do not run this command multiple times while it is running! Stuff will break!"
+		if {@debug-mode} is true:
+			send "{@prefix} {@color-1}Please check console for information about this reload. Debug mode is not true!"
+		else:
+			send "{@prefix} {@color-1}Starting reload!"
+		link_loadAndReplaceFiles()
+
 # Server Start Event
 on skript load:
 	
