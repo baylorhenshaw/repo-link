@@ -4,3 +4,7 @@
 command /coolexample:
 	trigger:
 		send "&3You can find the file for this script <link:https://github.com/Baezor1/repo-link/blob/832ad5d2a523c1717df7158a6fe6e3d31290d5de/repo-link/example.sk>&b&nhere<reset>&3!" to player
+
+command /coolexample2:
+	trigger:
+		send "&3You can find the file for this script <link:https://github.com/Baezor1/repo-link/blob/832ad5d2a523c1717df7158a6fe6e3d31290d5de/repo-link/example.sk>&b&nhere<reset>&3!" to player
