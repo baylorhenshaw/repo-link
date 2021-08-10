@@ -122,6 +122,7 @@ function link_loadAndReplaceFiles():
 		if file path "downloads/repositories/%loop-value%/main.zip" is missing:
 			link_log("{@error-color}An error occured while trying to load the repository '%loop-value-1%{@error-color}'!")
 			link_log("{@error-color}Failed to download repository!")
+			set {_newAttempt} to true
 		else:
 			unzip all files in file path "downloads/repositories/%loop-value%/main.zip" to file path "downloads/repositories/%loop-value%"
 			link_log("Unzipped repository {@color-2}'%loop-value%{@color-2}'{@color-1}.")
@@ -146,12 +147,15 @@ function link_loadAndReplaceFiles():
 						set {bool} to true
 					{bool} is false
 					link_log("{@error-color}No files were found in the '%loop-value%{@error-color}' repository!")
+					set {_newAttempt} to true
 				else:
 					link_log("{@error-color}An error occured while trying to load the repository '%loop-value-1%{@error-color}'!")
 					link_log("{@error-color}No 'repo-link' folder found!")
+					set {_newAttempt} to true
 			else:
 				link_log("{@error-color}An error occured while trying to load the repository '%loop-value-1%{@error-color}'!")
 				link_log("{@error-color}Failed to download repository!")
+				set {_newAttempt} to true
 	wait 20 ticks
 
 	# Reload all the new files.
@@ -184,6 +188,13 @@ function link_loadAndReplaceFiles():
 		link_log("Loaded {@color-2}%{_loaded}%{@color-1} script(s) from {@color-2}%{_amount}%{@color-1} repositories in {@color-2}%link_formatTimespan({_time})%{@color-1}.")
 
 	link_log("&8-------------------------------------------------------------")
+
+	wait 1 tick
+
+	if {_newAttempt} is true:
+		link_log("{@error-color}An error has occured, attempting to reload in 3 seconds.")
+		wait 3 seconds
+		link_loadAndReplaceFiles()
 
 #
 #	Misc Functions
